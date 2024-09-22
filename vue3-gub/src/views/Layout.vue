@@ -11,9 +11,9 @@ import {
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
 //查询userinfo
-import {userInfoGetService} from '@/api/user.js'
+import { userInfoGetService } from '@/api/user.js'
 import { userInfoStore } from '@/store/user.js';
-const infoStore = userInfoStore()   
+const infoStore = userInfoStore()
 const userInfoGet = async () => {
     let result = await userInfoGetService()
     infoStore.setInfo(result.data)
@@ -24,12 +24,39 @@ const userInfoGet = async () => {
 userInfoGet()
 
 //处理下拉菜单的跳转
-import {useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
+import { useTokenStore } from '@/store/token.js'
+import {ElMessage,ElMessageBox} from 'element-plus'
+const tokenStore = useTokenStore()
 const router = useRouter()
 const handleCommand = (command) => {
-    if(command == 'layout'){
-        //跳转
-    }else{
+    if (command == 'logout') {
+        //退出登录， 清空token， 清空用户信息
+        ElMessageBox.confirm(
+            '你确认退出登录码？',
+            '温馨提示',
+            {
+                confirmButtonText: '确认',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }
+        )
+            .then(async () => {
+                //用户点击了确认
+                //清空pinia中的token和个人信息
+                infoStore.removeInfo()
+                tokenStore.removeToken()
+                //跳转到登录页
+                router.push('/login')
+            })
+            .catch(() => {
+                //用户点击了取消
+                ElMessage({
+                    type: 'info',
+                    message: '取消退出',
+                })
+            })
+    } else {
         router.push(command)
     }
 
@@ -41,9 +68,8 @@ const handleCommand = (command) => {
         <!-- 左侧菜单 -->
         <el-aside width="200px">
             <div class="el-aside__logo"></div>
-            <el-menu active-text-color="#ffd04b" background-color="#232323"  text-color="#fff"
-                router>
-                <el-menu-item  index="/article/category">
+            <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
+                <el-menu-item index="/article/category">
                     <el-icon>
                         <Management />
                     </el-icon>
@@ -55,7 +81,7 @@ const handleCommand = (command) => {
                     </el-icon>
                     <span>文章管理</span>
                 </el-menu-item>
-                <el-sub-menu >
+                <el-sub-menu>
                     <template #title>
                         <el-icon>
                             <UserFilled />
@@ -87,7 +113,9 @@ const handleCommand = (command) => {
         <el-container>
             <!-- 头部区域 -->
             <el-header>
-                <div>黑马程序员：<strong>{{ infoStore.userInfo.nickname ? infoStore.userInfo.nickname : infoStore.userInfo.usrename }}</strong></div>
+                <div>黑马程序员：<strong>{{ infoStore.userInfo.nickname ? infoStore.userInfo.nickname :
+                        infoStore.userInfo.usrename
+                        }}</strong></div>
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
                         <el-avatar :src="infoStore.userInfo.userPic ? infoStore.userInfo.userPic : avatar" />

@@ -32,7 +32,7 @@ const categorys = ref([
     }
 ])
 //更新categorys数据
-import { articleCategoryService, articleDeleteService, articleAddService } from '@/api/article'
+import { articleCategoryService, articleDeleteService, articleAddService, articleDetailService, articleUpdateService} from '@/api/article'
 const getCategorys = async () => {
     let result = await articleCategoryService()
     categorys.value = result.data
@@ -150,7 +150,7 @@ const handleSuccess = (ImgUrl) => {
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
-//发布文章
+//发布(添加）文章
 const articleAdd = async (state) => {
     articleModel.value.state = state
     let result = await articleAddService(articleModel.value)
@@ -160,6 +160,22 @@ const articleAdd = async (state) => {
     //隐藏抽屉
     visibleDrawer.value = false
 }
+//获取文章的详细信息， 用于编辑回显
+const articleDetail = async(row) => {
+    title.value = '修改文章'
+    let result = await articleDetailService(row.id)
+    articleModel.value = result.data
+}
+//修改文章的信息
+const articleUpdate = async(state) =>{
+    articleModel.value.state = state
+    let result = await articleUpdateService(articleModel.value)
+    ElMessage.success(result.message ? result.message : '修改成功')
+    //关闭抽屉
+    visibleDrawer.value = false
+}
+//复用添加文章、修改文章的弹窗
+const title = ref('')
 </script>
 <template>
     <el-card class="page-container">
@@ -167,7 +183,7 @@ const articleAdd = async (state) => {
             <div class="header">
                 <span>文章管理</span>
                 <div class="extra">
-                    <el-button type="primary" @click="visibleDrawer = true">添加文章</el-button>
+                    <el-button type="primary" @click="visibleDrawer = true;title='添加文章'">添加文章</el-button>
                 </div>
             </div>
         </template>
@@ -199,7 +215,7 @@ const articleAdd = async (state) => {
             <el-table-column label="状态" prop="state"></el-table-column>
             <el-table-column label="操作" width="100">
                 <template #default="{ row }">
-                    <el-button :icon="Edit" circle plain type="primary"></el-button>
+                    <el-button :icon="Edit" circle plain type="primary" @click="articleDetail(row);visibleDrawer=true"></el-button>
                     <el-button :icon="Delete" circle plain type="danger" @click="deleteArticle(row)"></el-button>
                 </template>
             </el-table-column>
@@ -212,7 +228,7 @@ const articleAdd = async (state) => {
             layout="jumper, total, sizes, prev, pager, next" background :total="total" @size-change="onSizeChange"
             @current-change="onCurrentChange" style="margin-top: 20px; justify-content: flex-end" />
         <!-- 抽屉 -->
-        <el-drawer v-model="visibleDrawer" title="添加文章" direction="rtl" size="50%">
+        <el-drawer v-model="visibleDrawer" :title=title direction="rtl" size="50%">
             <!-- 添加文章表单 -->
             <el-form :model="articleModel" label-width="100px">
                 <el-form-item label="文章标题">
@@ -241,8 +257,8 @@ const articleAdd = async (state) => {
                     </div>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="articleAdd('已发布') ">发布</el-button>
-                    <el-button type="info" @click="articleAdd('草稿')">草稿</el-button>
+                    <el-button type="primary" @click="title === '添加文章' ? articleAdd('已发布') : articleUpdate('已发布')">发布</el-button>
+                    <el-button type="info" @click="title === '添加文章' ? articleAdd('草稿') : articleUpdate('草稿')">草稿</el-button>
                 </el-form-item>
             </el-form>
         </el-drawer>

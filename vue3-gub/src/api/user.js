@@ -23,3 +23,19 @@ export const userLoginService = (loginDate) =>{
 export const userInfoGetService = ()=>{
   return request.get('/user/userInfo');
 }
+
+//修改用户信息
+export const userUpdateService = (updateData) => {
+  // const params = new URLSearchParams();
+  // for (let key in updateData){
+  //   params.append(key, updateData[key])
+  // }
+  return request.put('/user/update', updateData)
+}
+
+//修改用户头像
+export const userAvatarUpdateService = (url) => {
+  let params = new URLSearchParams()
+  params.append('avatar', url)
+  return request.patch('/user/updateAvatar', params)
+}

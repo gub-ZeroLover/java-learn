@@ -28,7 +28,7 @@ export const articleListService = (params) => {
 
 //文章删除
 export const articleDeleteService = (id) => {
-    return request.delete('/article?id=',id)
+    return request.delete('/article?id=' + id)
 }
 
 //文章添加
@@ -36,3 +36,13 @@ export const articleAddService = (data) => {
     return request.post('/article',data)
 }
 
+//文章详细信息
+export const articleDetailService = (id) => {
+    return request.get('/article/detail?id=' + id)
+
+}
+
+//文章修改
+export const articleUpdateService = (data) => {
+    return request.put('/article', data)
+}
